@@ -86,6 +86,8 @@ if df_temp.empty:
 #reset to keep the date as the column
 if debug:st.write(f'before resetting columns ...{df_temp.columns}')
 df_temp=df_temp.reset_index(drop=False)
+#changing Date into Datetime
+df_temp['Date']=pd.to_datetime['Date'] #in remote
 if debug:st.write(df_temp)
 if debug:st.write(df_temp.columns)
 
