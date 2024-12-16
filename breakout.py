@@ -27,12 +27,12 @@ def get_selling_date_and_close(buy_index,holding_period):
   except:
     return None,None
 
-def get_df_between_buy_sell(buy_date,sell_date):
-  '''
-  This function returns the dataframe between the buy date and sell date
-  '''
-  temp_df=df[(df['Date']>=buy_date)&(df['Date']<=sell_date)]
-  return temp_df
+# def get_df_between_buy_sell(buy_date,sell_date):
+#   '''
+#   This function returns the dataframe between the buy date and sell date
+#   '''
+#   temp_df=df[(df['Date']>=buy_date)&(df['Date']<=sell_date)]
+#   return temp_df
 
 #user input ticker, start_date, end_date,volume_threshold%,%change on the end date,holding period
 debug=True
@@ -84,6 +84,7 @@ if df_temp.empty:
    st.warning('Error occured try again with a valid ticker !',icon='⚠️')
    st.stop()
 #reset to keep the date as the column
+if debug:st.write(f'before resetting columns ...{df_temp.columns}')
 df_temp=df_temp.reset_index(drop=False)
 if debug:st.write(df_temp)
 if debug:st.write(df_temp.columns)
