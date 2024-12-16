@@ -85,9 +85,7 @@ if df_temp.empty:
    st.stop()
 #reset to keep the date as the column
 if debug:st.write(f'before resetting columns ...{df_temp.columns}')
-df_temp=df_temp.reset_index(drop=False)
-#changing Date into Datetime
-df_temp['Date']=pd.to_datetime(df_temp['Date']) #in remote
+
 if debug:st.write(df_temp)
 if debug:st.write(df_temp.columns)
 
@@ -98,9 +96,12 @@ if remote:
 else:
    df=df_temp.copy()
 
-
+df_temp=df_temp.reset_index(drop=False)
+#changing Date into Datetime
+df_temp['Date']=pd.to_datetime(df_temp['Date']) #in remote
 #difference between start and end date
 days_diff=int((end_date-start_date).days)
+
 if debug:st.write(f'Differences between end and start date: {days_diff}')
 
 holding_time=st.sidebar.number_input('Enter holding business days',value=10,min_value=0,max_value=days_diff,format='%d')
