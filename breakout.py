@@ -84,15 +84,25 @@ if df_temp.empty:
    st.warning('Error occured try again with a valid ticker !',icon='⚠️')
    st.stop()
 #reset to keep the date as the column
+#might need to change this part for the remote
+
 if debug:st.write(f'before resetting index ...{df_temp.columns}')
 
 if debug:st.write(df_temp)
-if debug:st.write(df_temp.columns)
+#if debug:st.write(df_temp.columns)
+  
+remote=True
+if remote:
+   df=df_temp[user_ticker]
+else:
+   df=df_temp.copy()
 
-df_temp=df_temp.reset_index(drop=False)
+#df_temp=df_temp.reset_index(drop=False)
+df=df.reset_index(drop=False)
 #changing Date into Datetime
-df_temp['Date']=pd.to_datetime(df_temp['Date']) #in remote
-if debug:st.write(f'after resetting index ...{df_temp.columns}')
+#df_temp['Date']=pd.to_datetime(df_temp['Date']) #in remote
+df['Date']=pd.to_datetime(df['Date']) #in remote
+if debug:st.write(f'after resetting index df columns...{df.columns}')
 
 #might need to change this part for the remote
 remote=True
