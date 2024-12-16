@@ -15,9 +15,9 @@ def is_business_day(date):
   '''
   return pd.to_datetime(date).weekday()<5
 
-def get_selling_date_and_close(buy_index,holding_period):
+def get_selling_date_and_close(df,buy_index,holding_period):
   '''
-  This function returns the selling date for a given buy date and holding period
+  This function returns the selling date for a given buy date and holding period based on the original dataframe
   '''
   try:
     sell_index=buy_index+holding_period
@@ -146,17 +146,19 @@ df.loc[:,'percent_change_condition']=df['daily_change%'].copy()>pct_threshold
 df.loc[:,'buy_condition']=(df['volume_condition'].copy() & df['percent_change_condition'].copy())
 
 #filter the dataframe with df_buy
+#BUY dataframe here onwards
+
 df_buy=df.copy()[df.copy()['buy_condition']==True]
 if df_buy.empty:
    st.warning('NO DATA FOR GIVEN CONDITION',icon='⚠️')
    st.stop()
 
-#NOTE:resetting the columns to get Date column
+#NOTE:resetting the columns to get Date column, otherwise it is interpreted as the index by streamlit
 df_buy.reset_index(drop=False,inplace=True)
 st.markdown("<h4 Style='text-align:center;'>RESULTS FOR GIVEN CONDITION</h4>",unsafe_allow_html=True)
 #getting selling date and price
-df_buy.loc[:,'selling_date']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[0])
-df_buy.loc[:,'selling_price']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[1])
+df_buy.loc[:,'selling_date']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(df,buy_index,holding_time)[0])
+df_buy.loc[:,'selling_price']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(df,buy_index,holding_time)[1])
 df_buy.loc[:,'return(%)']=(df_buy['selling_price'].copy()/df_buy['Close'].copy()-1)*100
 df_buy.insert(1,'ticker',user_ticker)
 
