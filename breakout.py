@@ -173,8 +173,8 @@ df_final=df_buy[selected_columns].reset_index(drop=True)
 df_final=df_final.rename(columns={'Close':'buying_price','Date':'buying_date','Volume':'traded_volume(M)','volume_average_20_days':'avg_volume_20days (M)'}).round(2)
 
 #modify the buying and selling date
-df_final['buying_date']=df_final['buying_date'].dt.date
-df_final['selling_date']=df_final['selling_date'].dt.date
+df_final['buying_date']=df_final['buying_date']#.dt.date
+df_final['selling_date']=df_final['selling_date']#.dt.date
 df_final['holding_days']=holding_time
 df_final['volume_threshold(%)']=volume_threshold
 df_final['last_change_threshold(%)']=pct_threshold
