@@ -35,7 +35,7 @@ def get_df_between_buy_sell(buy_date,sell_date):
   return temp_df
 
 #user input ticker, start_date, end_date,volume_threshold%,%change on the end date,holding period
-debug=False
+debug=True
 #ask the user for the ticker
 user_ticker=st.sidebar.text_input("Enter a ticker",value='TSLA',key='ticker').upper()
 
