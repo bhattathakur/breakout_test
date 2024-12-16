@@ -167,8 +167,8 @@ df_buy['Volume']=df_buy['Volume'].div(1e6)
 df_buy['volume_average_20_days']=df_buy['volume_average_20_days'].div(1e6)
 
 #getting final df 
-if debug:st.write(df_buy.tail())
-if debug:st.write(df_buy.tail())
+if debug:st.write('DF_BUY')
+if debug:st.write(df_buy)
 if debug:st.write(df_buy.columns)
 if debug:st.write(f'index: {df_buy.index}')
 st.stop()
