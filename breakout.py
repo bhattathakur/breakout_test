@@ -3,8 +3,9 @@
 import pandas as pd
 import yfinance as yf
 import streamlit as st
+import matplotlib.pyplot as plt
 
-st.page_page_config(layout='wide')
+st.set_page_config(layout='wide')
 
 #functions to use in the later part
 ##check if the given date is business day or not
@@ -34,9 +35,9 @@ def get_df_between_buy_sell(buy_date,sell_date):
   return temp_df
 
 #user input ticker, start_date, end_date,volume_threshold%,%change on the end date,holding period
-debug=True
+debug=False
 #ask the user for the ticker
-user_ticker=st.sidebar.text_input("Enter a ticker",value='TSLA',key='ticker')
+user_ticker=st.sidebar.text_input("Enter a ticker",value='TSLA',key='ticker').upper()
 
 if debug:st.write(f'ticker: {user_ticker}')
 
@@ -120,30 +121,90 @@ if debug:st.write(f'pct_threshold: {pct_threshold}')
 
 #get daily change % and 20 day average volume
 df.loc[:,'daily_change%']=df['Close'].copy().pct_change()*100
-df.loc[:,'volume_avearge_20_days']=df['Volume'].copy().rolling(window=20).mean()
-df.loc[:,'volume_condition']=df['Volume'].copy()>df['volume_avearge_20_days'].copy()*(100+volume_threshold)/100
+df.loc[:,'volume_average_20_days']=df['Volume'].copy().rolling(window=20).mean()
+df.loc[:,'volume_condition']=df['Volume'].copy()>df['volume_average_20_days'].copy()*(100+volume_threshold)/100
 df.loc[:,'percent_change_condition']=df['daily_change%'].copy()>pct_threshold
 df.loc[:,'buy_condition']=(df['volume_condition'].copy() & df['percent_change_condition'].copy())
 
 #filter the dataframe with df_buy
 df_buy=df[df['buy_condition']==True]
+if df_buy.empty:
+   st.warning('NO DATA FOR GIVEN CONDITION',icon='⚠️')
+   st.stop()
 
+st.markdown("<h4 Style='text-align:center;'>RESULTS FOR GIVEN CONDITION</h4>",unsafe_allow_html=True)
 #getting selling date and price
 df_buy.loc[:,'selling_date']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[0])
 df_buy.loc[:,'selling_price']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[1])
 df_buy.loc[:,'return(%)']=(df_buy['selling_price'].copy()/df_buy['Close'].copy()-1)*100
 df_buy.insert(1,'ticker',user_ticker)
 
+#change the volume into millions
+df_buy['Volume']=df['Volume'].div(1e6)
+df_buy['volume_average_20_days']=df['volume_average_20_days'].div(1e6)
+
 #getting final df 
-selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)']
+selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)','Volume','volume_average_20_days']
 df_final=df_buy[selected_columns].reset_index(drop=True)
-df_final=df_final.rename(columns={'Close':'buying_price','Date':'buying_date'}).round(2)
+df_final=df_final.rename(columns={'Close':'buying_price','Date':'buying_date','Volume':'traded_volume(M)','volume_average_20_days':'avg_volume_20days (M)'}).round(2)
 
 #modify the buying and selling date
 df_final['buying_date']=df_final['buying_date'].dt.date
 df_final['selling_date']=df_final['selling_date'].dt.date
+df_final['holding_days']=holding_time
+df_final['volume_threshold(%)']=volume_threshold
+df_final['last_change_threshold(%)']=pct_threshold
 df_final.index=range(1,len(df_final)+1)
 df_final.index.name='S.N.'
+df_final.dropna(inplace=True)
+#debug=True
+#if debug:st.write(df_buy)
+#color the values
+def color_val(val):
+   if val>0:return "color:green;"
+   return "color:red;"
+#df_fin=df_final.style.applymap(color_val,subset=['return(%)'])#.format('{:.2f}')
 
+st.dataframe(df_final,use_container_width=True)
+#include download button
+file_name=f'{user_ticker}.csv'
+csv=df_final.to_csv()
 
-if debug:st.write(df_final)
+st.sidebar.download_button(
+   label='Download Result',
+   data=csv,
+   file_name=file_name,
+   mime='text/csv'
+)
+
+#this part is for the matplotlib plot
+x_ticks=df_final['buying_date'].to_list()
+y_ticks=df_final['selling_date'].to_list()
+custom_ticks=[f'BUY:{x}\nSELL:{y}' for x,y in zip(x_ticks,y_ticks)]
+colors=['green' if x>0 else 'red' for x in df_final['return(%)']]
+mean_return=df_final['return(%)'].mean()
+#custom_ticks
+if debug:st.write(custom_ticks)
+# Plotting the bar chart
+fig, ax = plt.subplots(figsize=(15, 6))
+ax = df_final['return(%)'].plot(kind='bar', ax=ax, color=colors)
+ax.set_ylabel('return(%)')
+ax.set_xlabel('buy/sell dates')
+ax.axhline(y=mean_return, color='blue', linestyle='--')
+ax.bar_label(ax.containers[0], rotation=0, fontsize=8)
+ax.set_xticklabels(custom_ticks, rotation=90)
+#annotation
+ax.annotate(f'mean_return: {mean_return:0.2f} %',
+            xy=(0.5,0.5),
+            bbox=dict(facecolor='yellow', edgecolor='black', boxstyle='round,pad=0.5'),  # Highlight with yellow background
+            color='magenta',
+    xycoords='axes fraction',  # Use axes fraction coordinates for the annotation
+    textcoords='axes fraction'  # Use axes fraction coordinates for the text
+            )
+
+legend=ax.legend([f'mean_return(%)'])
+title_text=f'{user_ticker} | start_date: {start_date} | end_date: {end_date} | holding_days: {holding_time} | volume_threshold%: {volume_threshold} | price_change_threshold%: {pct_threshold}'
+plt.title(title_text)
+#plt.grid(True)
+# Render the plot in Streamlit
+st.pyplot(fig)
