@@ -146,7 +146,7 @@ df.loc[:,'percent_change_condition']=df['daily_change%'].copy()>pct_threshold
 df.loc[:,'buy_condition']=(df['volume_condition'].copy() & df['percent_change_condition'].copy())
 
 #filter the dataframe with df_buy
-df_buy=df[df['buy_condition']==True]
+df_buy=df.copy()[df.copy()['buy_condition']==True]
 if df_buy.empty:
    st.warning('NO DATA FOR GIVEN CONDITION',icon='⚠️')
    st.stop()
