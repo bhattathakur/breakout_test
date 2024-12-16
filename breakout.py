@@ -163,9 +163,11 @@ df_buy['Volume']=df_buy['Volume'].div(1e6)
 df_buy['volume_average_20_days']=df_buy['volume_average_20_days'].div(1e6)
 
 #getting final df 
-if debug:st.write(df_buy.head())
+if debug:st.write(df_buy.tail())
+if debug:st.write(df_buy.tail())
 if debug:st.write(df_buy.columns)
-#st.stop()
+if debug:st.write(f'index: {df_buy.index}')
+st.stop()
 #resetting the columns to get Date column
 df_buy.reset_index(drop=False,inplace=True)
 selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)','Volume','volume_average_20_days']
