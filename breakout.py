@@ -136,7 +136,7 @@ pct_threshold=st.sidebar.number_input("Enter the percent threshold %",value=2.0,
 if debug:st.write(f'pct_threshold: {pct_threshold}')
 if debug:st.write(f'before adding columns: {df.columns}')
 if debug:st.write(df.head())
-st.stop()
+#st.stop()
 
 #get daily change % and 20 day average volume
 df.loc[:,'daily_change%']=df['Close'].copy().pct_change()*100
