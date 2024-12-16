@@ -151,6 +151,8 @@ if df_buy.empty:
    st.warning('NO DATA FOR GIVEN CONDITION',icon='⚠️')
    st.stop()
 
+#NOTE:resetting the columns to get Date column
+df_buy.reset_index(drop=False,inplace=True)
 st.markdown("<h4 Style='text-align:center;'>RESULTS FOR GIVEN CONDITION</h4>",unsafe_allow_html=True)
 #getting selling date and price
 df_buy.loc[:,'selling_date']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[0])
@@ -168,8 +170,7 @@ if debug:st.write(df_buy.tail())
 if debug:st.write(df_buy.columns)
 if debug:st.write(f'index: {df_buy.index}')
 st.stop()
-#resetting the columns to get Date column
-df_buy.reset_index(drop=False,inplace=True)
+
 selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)','Volume','volume_average_20_days']
 df_final=df_buy[selected_columns].reset_index(drop=True)
 df_final=df_final.rename(columns={'Close':'buying_price','Date':'buying_date','Volume':'traded_volume(M)','volume_average_20_days':'avg_volume_20days (M)'}).round(2)
