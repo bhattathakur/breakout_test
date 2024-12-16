@@ -15,7 +15,7 @@ def is_business_day(date):
   '''
   return pd.to_datetime(date).weekday()<5
 
-def get_selling_date_and_close(df,buy_row,holding_period):
+def get_selling_date_and_close(buy_index,holding_period):
   '''
   This function returns the selling date for a given buy date and holding period based on the original dataframe
   '''
@@ -53,7 +53,7 @@ def get_selling_date_and_close(df,buy_row,holding_period):
 #   return temp_df
 
 #user input ticker, start_date, end_date,volume_threshold%,%change on the end date,holding period
-debug=False
+debug=True
 #ask the user for the ticker
 user_ticker=st.sidebar.text_input("Enter a ticker",value='TSLA',key='ticker').upper()
 
@@ -107,8 +107,9 @@ if df_temp.empty:
 if debug:st.write(f'before resetting index ...{df_temp.columns}')
 
 if debug:st.write(df_temp)
-#if debug:st.write(df_temp.columns)
-  
+if debug:st.write(df_temp.columns)
+
+#might need to change this part for the remote
 remote=False
 if remote:
    df=df_temp[user_ticker]
@@ -172,19 +173,10 @@ if df_buy.empty:
    st.warning('NO DATA FOR GIVEN CONDITION',icon='⚠️')
    st.stop()
 
-#NOTE:resetting the columns to get Date column, otherwise it is interpreted as the index by streamlit
-df_buy.reset_index(drop=False,inplace=True)
-if debug:st.write(f'df_buy_columns: {df_buy.columns}')
-if debug:st.write(f'df_buy: {df_buy}')
 st.markdown("<h4 Style='text-align:center;'>RESULTS FOR GIVEN CONDITION</h4>",unsafe_allow_html=True)
 #getting selling date and price
-#Need to fix this part
-#find the date original dataframe
-#test_df=df_buy['Date']
-#st.write(f'test_df: {test_df}')
-#df_buy.loc[:,'selling_date']=df_buy['row_key'].copy().map(lambda buy_row:get_selling_date_and_close(df,buy_row,holding_time)[0])
-df_buy.loc[:,'selling_date']=df_buy['row_key'].apply(lambda buy_row:get_selling_date_and_close(df,buy_row,holding_time)[0])
-df_buy.loc[:,'selling_price']=df_buy['row_key'].copy().map(lambda buy_row:get_selling_date_and_close(df,buy_row,holding_time)[1])
+df_buy.loc[:,'selling_date']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[0])
+df_buy.loc[:,'selling_price']=df_buy.index.copy().map(lambda buy_index:get_selling_date_and_close(buy_index,holding_time)[1])
 df_buy.loc[:,'return(%)']=(df_buy['selling_price'].copy()/df_buy['Close'].copy()-1)*100
 df_buy.loc[:,'mean_return(%)']=df_buy['return(%)'].mean()
 df_buy.insert(1,'ticker',user_ticker)
@@ -194,18 +186,11 @@ df_buy['Volume']=df_buy['Volume'].div(1e6)
 df_buy['volume_average_20_days']=df_buy['volume_average_20_days'].div(1e6)
 
 #getting final df 
-if debug:st.write('DF_BUY')
-if debug:st.write(df_buy)
-if debug:st.write(df_buy.columns)
-if debug:st.write(f'index: {df_buy.index}')
-#st.stop()
-
-selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)','mean_return(%)','Volume','volume_average_20_days']
+selected_columns=['ticker','Date','Close','selling_date','selling_price','return(%)','Volume','volume_average_20_days']
 df_final=df_buy[selected_columns].reset_index(drop=True)
 df_final=df_final.rename(columns={'Close':'buying_price','Date':'buying_date','Volume':'traded_volume(M)','volume_average_20_days':'avg_volume_20days (M)'}).round(2)
 
 #modify the buying and selling date
-#might need to change to datetime if needed
 df_final['buying_date']=df_final['buying_date'].dt.date
 df_final['selling_date']=df_final['selling_date'].dt.date
 df_final['holding_days']=holding_time
