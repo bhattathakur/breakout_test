@@ -124,6 +124,8 @@ if debug:st.write(f'volume_threshold: {volume_threshold}')
 #volume threshold percentage
 pct_threshold=st.sidebar.number_input("Enter the percent threshold %",value=2.0,min_value=0.0)
 if debug:st.write(f'pct_threshold: {pct_threshold}')
+if debug:st.write(f'before adding columns: {df.columns}')
+if debug.st.write(f'{df.head()}')
 st.stop()
 
 #get daily change % and 20 day average volume
