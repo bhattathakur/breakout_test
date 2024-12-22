@@ -209,7 +209,7 @@ def color_val(val):
 def apply_color(row):
   return [color_val(val) for val in row]
   
-df_fin=df_final.style.map(color_val,subset=['return(%)'],axis=0)#.format('{:.2f}')
+df_fin=df_final.style.map(color_val,subset=['return(%)'],axis=1)#.format('{:.2f}')
 
 #st.dataframe(df_final,use_container_width=True)
 st.markdown(df_fin.to_html(),unsafe_allow_html=True)
