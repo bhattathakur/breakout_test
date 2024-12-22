@@ -205,9 +205,10 @@ df_final.dropna(inplace=True)
 def color_val(val):
    if val>0:return "color:green;"
    return "color:red;"
-#df_fin=df_final.style.applymap(color_val,subset=['return(%)'])#.format('{:.2f}')
+df_fin=df_final.style.apply(lambda row:row.apply(color_val),subset=['return(%)'])#.format('{:.2f}')
 
-st.dataframe(df_final,use_container_width=True)
+#st.dataframe(df_final,use_container_width=True)
+st.dataframe(df_fin,use_container_width=True)
 #include download button
 file_name=f'{user_ticker}.csv'
 csv=df_final.to_csv()
