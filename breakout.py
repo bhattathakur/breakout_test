@@ -205,7 +205,11 @@ df_final.dropna(inplace=True)
 def color_val(val):
    if val>0:return "color:green;"
    return "color:red;"
-df_fin=df_final.style.apply(lambda row:row.apply(color_val),subset=['return(%)'],axis=1)#.format('{:.2f}')
+  
+def apply_color(row):
+  return [color_val(val) for val in row]
+  
+df_fin=df_final.style.apply(apply_color,subset=['return(%)'],axis=1)#.format('{:.2f}')
 
 #st.dataframe(df_final,use_container_width=True)
 st.markdown(df_fin.to_html(),unsafe_allow_html=True)
